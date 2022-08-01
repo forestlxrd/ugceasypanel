@@ -13,6 +13,10 @@ import random as r
 
 import PySimpleGUI as sg
 
+project_dir = os.path.dirname(__file__) + '\\' + "variableStoringFile.dat"
+
+dataloc = project_dir
+
 #-------------webdriver auto install before every start-------------
 
 option = webdriver.ChromeOptions()
@@ -53,7 +57,12 @@ def steamID(searchterm):
 
     #-------------get back the results-------------
 
-    foundstuff = driver.find_element(By.ID, "steamids").text
+    if check_exists_by_xpath("//*[@id='steamids']") == True:
+
+        foundstuff = driver.find_element(By.ID, "steamids").text
+    
+    else:
+        return "Error"
 
     finalizer = foundstuff.replace('\n', '')
 
@@ -82,11 +91,11 @@ def steamID(searchterm):
 
 #-------------List a players bans from sourcebans-------------
 
-def bans(id):
+def bans(id, webpage):
 
     #-------------Define and get the webpage-------------
 
-    webpage = r"https://ugc-gaming.net/sourcebans/index.php"
+    #webpage = r"https://ugc-gaming.net/sourcebans/index.php"
 
     driver.get(webpage)
 
@@ -132,11 +141,11 @@ def bans(id):
 
 #-------------List a players communication blocks from sourcebans-------------
 
-def comms(id):
+def comms(id, webpage):
 
     #-------------Define and get the webpage-------------
 
-    webpage = r"https://ugc-gaming.net/sourcebans/index.php"
+    #webpage = r"https://ugc-gaming.net/sourcebans/index.php"
 
     driver.get(webpage)
 
@@ -191,7 +200,8 @@ def tf2():
 #-------------connect to a server by ip-------------
 
 def connect(ip):
-    webbrowser.open('steam://connect/' + ip)
+    if ip != " " or "":
+        webbrowser.open('steam://connect/' + ip)
 
 #-------------Get a random fake name-------------
 
@@ -201,13 +211,13 @@ def fakeName():
     button = driver.find_element(By.CLASS_NAME, "spin")
     button.click()
 
-    time.sleep(3)
+    time.sleep(5)
 
     namenum = r.randint(1,30)
 
     name = driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div/div/div[2]/div/div/div[1]/div/div[1]/div[4]/div[1]/div/ul/li[{}]/a".format(namenum)).get_attribute('textContent')
 
-    print("\n your generated name is: ", name, ", and it has been added to your clipboard!")
+    #print("\n your generated name is: ", name, ", and it has been added to your clipboard!")
 
     pyperclip.copy(name)
 
@@ -248,18 +258,18 @@ def serverlist():
 #------------------------------------------------------GUI------------------------------------------------------
 
 sg.theme('DarkGrey15')
-layout = [[sg.Text("UGC Easy Admin Panel V2", text_color="orange", font="Arial, 25 bold", justification="center", expand_x=True )],
+layout = [[sg.Text("UGC Easy Admin Panel V2", text_color="orange", font="Arial, 25 bold", size=(53, 1)),sg.Text("Select a community for sourcebans", size=(17,2)), sg.Listbox(key="serverselect", values=("UGC", "Wonderland"), default_values="UGC", text_color="white", size=(15,2))],
             [sg.Text("")],
-            [sg.Button('Launch Team Fortress 2', size=(20, 1)), sg.Button('Generate a fake name', key="fake", size=(20, 1)), sg.Button('Open sourcebans website', key="sourcebans", size=(20, 1))],
-            [sg.Text("Starts TF2", size=(20, 1)), sg.Text(key="fakeName", size=(20, 2), text="Generates a name"), sg.Text(size=(20, 2), text="Opens sourcebans in a new tab")],
+            [sg.Button('Launch Team Fortress 2', size=(20, 1)), sg.Button('Generate a fake name', key="fake", size=(20, 1)), sg.Button('Open sourcebans website', key="sourcebans", size=(20, 1)), sg.Button('Open forums', key="forums", size=(20, 1))],
+            [sg.Text("Starts TF2", size=(21, 1)), sg.Text(key="fakeName", size=(20, 2), text="Generates a name"), sg.Text(size=(20, 2), text="Opens sourcebans in a new tab"), sg.Text(size=(20, 2), text="Opens forums in a new tab")],
             [sg.Text("")],
             [sg.Text("Sourcebans", font="Arial, 20 bold", size=(16, 1)), sg.Text("Steam ID", font="Arial, 20 bold", size=(21, 1)), sg.Text("Servers", font="Arial, 20 bold", size=(16, 1))],
             [sg.Text("ID/URL"), sg.Input(key="IDinput", do_not_clear=False, size=(29, 1)), sg.Text(""), sg.Input(key="profileIn", do_not_clear=False, size=(29, 1)), sg.Text("profile url to\n steamID", font="Arial, 10 italic")],
             [sg.Button("Comms", pad="50, 0", size=(15, 1)), sg.Button("Bans", pad="50, 0", size=(15, 1)), sg.Text(""), sg.Button("Submit", pad="50, 0", size=(25, 1), key="submiturl"),sg.Text("", size=(70, 1)), sg.Text("Input the IP below")],
             [sg.Text("", size=(35, 1)), sg.Text(key="OutputID", size=(25, 2)), sg.Text("", size=(17, 1)), sg.Button("Get server list", key="serverReq", size=(15, 1)), sg.Button("Join selected server", key="serverJoin", size=(15, 1)), sg.Button("Join server by IP", key="JoinIP", size=(15, 1)), sg.Input(key="inIP", size=(20, 1))],
-            [sg.Text(key="Output", size=(80, 20)), sg.Listbox(key="serversOut", values="", size=(100, 20), text_color="white")],
+            [sg.Text(key="Output", size=(80, 20), background_color="#404040"), sg.Listbox(key="serversOut", values="", size=(100, 20), text_color="white")],
             [sg.Text("Total:", size=(80, 1), key="totalbans"), sg.Text("Note: every function in the panel will take some time to load, since it has to reach the websites. If the desired server is not in the servers list, try again by requesting the list again.", font="Arial, 8 italic", size=(100, 2))],
-            [sg.Button("Clear", key="Clear"), sg.Text("", size=(160, 1)), sg.Button("Exit panel", key="Exit", button_color="red")]]
+            [sg.Button("Clear", key="Clear"), sg.Text("", size=(150, 1)), sg.Button("Exit panel", key="Exit", button_color="red", size=(10, 2))]]
 
 window = sg.Window('UGC Easy Admin Panel V2', layout)
 
@@ -278,9 +288,17 @@ while True:
 
     elif event == "Comms":
         ID = values["IDinput"]
+
+        server = window["serverselect"].get()
+
+        if server == "Wonderland":
+            rServer = "https://bans.wonderland.tf/"
+        else:
+            rServer = "https://ugc-gaming.net/sourcebans/index.php"
+
         rID = steamID(ID)
 
-        out = comms(rID)
+        out = comms(rID, rServer)
 
         window["Output"].update("\n".join(out))
 
@@ -290,9 +308,17 @@ while True:
 
     elif event == "Bans":
         ID = values["IDinput"]
+
+        server = window["serverselect"].get()
+
+        if server == "Wonderland":
+            rServer = "https://bans.wonderland.tf/"
+        else:
+            rServer = "https://ugc-gaming.net/sourcebans/index.php"
+
         rID = steamID(ID)
 
-        out = bans(rID)
+        out = bans(rID, rServer)
 
         window["Output"].update("\n".join(out))
     
@@ -356,3 +382,6 @@ while True:
 
     elif event == "sourcebans":
         webbrowser.open('https://ugc-gaming.net/sourcebans/index.php')
+
+    elif event == "forums":
+        webbrowser.open('https://ugc-gaming.net/index.php?forums/')
