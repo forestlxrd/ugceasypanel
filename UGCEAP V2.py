@@ -13,10 +13,6 @@ import random as r
 
 import PySimpleGUI as sg
 
-project_dir = os.path.dirname(__file__) + '\\' + "variableStoringFile.dat"
-
-dataloc = project_dir
-
 #-------------webdriver auto install before every start-------------
 
 option = webdriver.ChromeOptions()
